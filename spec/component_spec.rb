@@ -341,10 +341,6 @@ describe React::Component do
           it { is_expected.to eq 'hello 20' }
         end
       end
-
-      context 'multiple values' do
-        pending 'write this'
-      end
     end
   end
 
