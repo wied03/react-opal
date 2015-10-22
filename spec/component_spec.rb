@@ -272,6 +272,62 @@ describe React::Component do
 
       expect(React.render_to_static_markup(React.create_element(Foo))).to eq("<div>10</div>")
     end
+
+    describe 'set initial state from prop value' do
+      let(:wrapper) do
+        inner_klass = klass
+        Class.new do
+          include React::Component
+
+          define_state(:foo) { nil }
+
+          before_mount do
+            self.foo = 10
+            block = lambda do
+              self.foo = 20
+            end
+            `setTimeout(#{block}, 1000)`
+          end
+
+          define_method(:render) do
+            present inner_klass, foo: self.foo
+          end
+        end
+      end
+
+      subject do
+        rendered = renderToDocument wrapper
+        delay_with_promise 2 do
+          rendered.dom_node.innerHTML
+        end
+      end
+
+      context 'single value' do
+        context 'no block' do
+          let(:klass) do
+            Class.new do
+              include React::Component
+
+              define_state_prop :foo
+
+              def render
+                div { self.foo }
+              end
+            end
+          end
+
+          it { is_expected.to eq '20' }
+        end
+
+        context 'block' do
+          pending 'write this'
+        end
+      end
+
+      context 'multiple values' do
+        pending 'write this'
+      end
+    end
   end
 
   describe "Props" do
@@ -340,8 +396,36 @@ describe React::Component do
     end
 
     describe 'Prop receiving' do
-      before do
-        klass = Class.new do
+      let(:wrapper) do
+        inner_klass = klass
+        Class.new do
+          include React::Component
+
+          define_state(:foo) { nil }
+
+          before_mount do
+            self.foo = 10
+            block = lambda do
+              self.foo = 20
+            end
+            `setTimeout(#{block}, 1000)`
+          end
+
+          define_method(:render) do
+            present inner_klass, foo: self.foo
+          end
+        end
+      end
+
+      subject do
+        rendered = renderToDocument wrapper
+        delay_with_promise 2 do
+          rendered.dom_node.innerHTML
+        end
+      end
+
+      let(:klass) do
+        Class.new do
           include React::Component
 
           define_state(:foo) { nil }
@@ -358,31 +442,10 @@ describe React::Component do
             div { self.foo }
           end
         end
-        stub_const 'PropRecv', Class.new
-        PropRecv.class_eval do
-          include React::Component
-
-          define_state(:foo) { nil }
-
-          before_mount do
-            self.foo = 10
-            block = lambda do
-              self.foo = 20
-            end
-            `setTimeout(#{block}, 1000)`
-          end
-
-          define_method(:render) do
-            present klass, foo: self.foo
-          end
-        end
       end
 
-      it 'converts native objects' do
-        rendered = renderToDocument PropRecv
-        delay_with_promise 2 do
-          expect(rendered.dom_node.innerHTML).to eq('20')
-        end
+      context 'native object' do
+        it { is_expected.to eq '20' }
       end
     end
 

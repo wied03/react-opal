@@ -109,7 +109,7 @@ module React
       def prop_types
         if self.validator
           {
-            _componentValidator: %x{
+              _componentValidator: %x{
               function(props, propName, componentName) {
                 var errors = #{validator.validate(Hash.new(`props`))};
                 var error = new Error(#{"In component `" + self.name + "`\n" + `errors`.join("\n")});
@@ -135,6 +135,16 @@ module React
           self.validator.evaluate_more_rules(&block)
         else
           self.validator = React::Validator.build(&block)
+        end
+      end
+
+      def define_state_prop(prop)
+        define_state prop
+        before_mount do
+          self.send("#{prop}=", params[prop])
+        end
+        before_receive_props do |new_props|
+          self.send("#{prop}=", new_props[prop])
         end
       end
 
@@ -175,7 +185,7 @@ module React
       def set_props(prop, &block)
         raise "No native ReactComponent associated" unless @native
         %x{
-          #{@native}.setProps(#{prop.shallow_to_n}, function(){
+        #{@native}.setProps(#{prop.shallow_to_n}, function(){
             #{block.call if block}
           });
         }
@@ -184,7 +194,7 @@ module React
       def set_props!(prop, &block)
         raise "No native ReactComponent associated" unless @native
         %x{
-          #{@native}.replaceProps(#{prop.shallow_to_n}, function(){
+        #{@native}.replaceProps(#{prop.shallow_to_n}, function(){
             #{block.call if block}
           });
         }
@@ -193,7 +203,7 @@ module React
       def set_state(state, &block)
         raise "No native ReactComponent associated" unless @native
         %x{
-          #{@native}.setState(#{state.shallow_to_n}, function(){
+        #{@native}.setState(#{state.shallow_to_n}, function(){
             #{block.call if block}
           });
         }
@@ -202,7 +212,7 @@ module React
       def set_state!(state, &block)
         raise "No native ReactComponent associated" unless @native
         %x{
-          #{@native}.replaceState(#{state.shallow_to_n}, function(){
+        #{@native}.replaceState(#{state.shallow_to_n}, function(){
             #{block.call if block}
           });
         }
