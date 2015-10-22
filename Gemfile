@@ -2,6 +2,7 @@ source 'https://rubygems.org'
 
 gemspec
 
+gem 'rake'
 gem 'react-source', '~> 0.13'
 gem 'sinatra'
 gem 'opal-jquery'
