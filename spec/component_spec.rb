@@ -320,7 +320,25 @@ describe React::Component do
         end
 
         context 'block' do
-          pending 'write this'
+          let(:klass) do
+            Class.new do
+              include React::Component
+
+              def process_value(new_value)
+                "hello #{new_value}"
+              end
+
+              define_state_prop :foo do |new_value|
+                process_value new_value
+              end
+
+              def render
+                div { self.foo }
+              end
+            end
+          end
+
+          it { is_expected.to eq 'hello 20' }
         end
       end
 

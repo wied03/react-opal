@@ -138,13 +138,19 @@ module React
         end
       end
 
-      def define_state_prop(prop)
+      def define_state_prop(prop, &block)
         define_state prop
+        update_value = lambda do |new_value|
+          new_value = instance_exec(new_value, &block) if block
+          self.send("#{prop}=", new_value)
+        end
         before_mount do
-          self.send("#{prop}=", params[prop])
+          # need to execute in context of each object
+          instance_exec params[prop], &update_value
         end
         before_receive_props do |new_props|
-          self.send("#{prop}=", new_props[prop])
+          # need to execute in context of each object
+          instance_exec new_props[prop], &update_value
         end
       end
 
