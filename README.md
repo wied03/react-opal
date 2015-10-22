@@ -1,17 +1,18 @@
 # React.rb
 
-[![Join the chat at https://gitter.im/zetachang/react.rb](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/zetachang/react.rb?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status](http://img.shields.io/travis/wied03/react.rb/master.svg?style=flat)](http://travis-ci.org/wied03/react.rb)
 
-[![Build Status](http://img.shields.io/travis/zetachang/react.rb/master.svg)](http://travis-ci.org/zetachang/react.rb)
-[![Gem Version](https://badge.fury.io/rb/react.rb.svg)](http://badge.fury.io/rb/react.rb)
-[![Code Climate](https://codeclimate.com/github/zetachang/react.rb/badges/gpa.svg)](https://codeclimate.com/github/zetachang/react.rb)
+**This React.rb is a a fork of the original [React.rb](https://github.com/zetachang/react.rb)  [Opal Ruby](http://opalrb.org) wrapper of [React.js library](http://facebook.github.io/react/)**.
 
-**React.rb is an [Opal Ruby](http://opalrb.org) wrapper of [React.js library](http://facebook.github.io/react/)**.
+## Why fork?
+* Keep it simple, don't create an entire framework
+* Test driven development is important
 
 It lets you write reactive UI components, with Ruby's elegance and compiled to run in JavaScript. :heart:
 
 ## Installation
 
+# TBD
 ```ruby
 # Gemfile
 gem "react.rb"
@@ -273,9 +274,28 @@ This project is still in early stage, so discussion, bug report and PR are reall
 
 ## Contact
 
-[David Chang](http://github.com/zetachang)
-[@zetachang](https://twitter.com/zetachang)
+TBD
 
 ## License
+
+Originally Copyright (c) 2015 Yi-Cheng Chang (http://github.com/zetachang)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
 
 In short, React.rb is available under the MIT license. See the LICENSE file for more info.
