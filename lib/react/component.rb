@@ -8,7 +8,7 @@ module React
       base.include(API)
       base.include(React::Callbacks)
       base.class_eval do
-        class_attribute :init_state, :validator
+        class_attribute :init_state, :validator, :context_types, :child_context_types
         define_callback :before_mount
         define_callback :after_mount
         define_callback :before_receive_props
@@ -29,6 +29,10 @@ module React
 
     def refs
       Hash.new(`#{@native}.refs`)
+    end
+
+    def context
+      Hash.new(`#{@native}.context`)
     end
 
     def state
@@ -151,6 +155,21 @@ module React
         before_receive_props do |new_props|
           # need to execute in context of each object
           instance_exec new_props[prop], &update_value
+        end
+      end
+
+      def consume_context(item)
+        self.context_types ||= {}
+        self.context_types[item] = `React.PropTypes.number`
+      end
+
+      def provide_context(item, &block)
+        self.child_context_types ||= {}
+        self.child_context_types[item] = `React.PropTypes.number`
+        define_method(:get_child_context) do
+          {
+              item => instance_eval(&block)
+          }
         end
       end
 

@@ -344,6 +344,46 @@ describe React::Component do
     end
   end
 
+  describe 'context' do
+    let(:wrapper) do
+      inner_klass = klass
+      Class.new do
+        include React::Component
+
+        provide_context(:foo) do
+          params[:foo_for_context]
+        end
+
+        define_method(:render) do
+          present inner_klass
+        end
+      end
+    end
+
+    subject {
+      rendered = renderToDocument wrapper, foo_for_context: 20
+      rendered.dom_node.innerHTML
+    }
+
+    let(:klass) do
+      Class.new do
+        include React::Component
+
+        consume_context(:foo)
+
+        def render
+          puts "context is #{self.context[:foo]}"
+
+          div { self.context[:foo] }
+        end
+      end
+    end
+
+    context 'single value' do
+      it { is_expected.to eq '20' }
+    end
+  end
+
   describe "Props" do
     describe "this.props could be accessed through `params` method" do
       before do
