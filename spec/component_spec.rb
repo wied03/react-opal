@@ -9,6 +9,7 @@ describe React::Component do
     stub_const 'Foo', Class.new
     Foo.class_eval do
       include React::Component
+
       def render
         React.create_element("div")
       end
@@ -34,6 +35,7 @@ describe React::Component do
       stub_const 'Foo', Class.new
       Foo.class_eval do
         include React::Component
+
         def render
           React.create_element("div") { "lorem" }
         end
@@ -49,8 +51,12 @@ describe React::Component do
     it "should invoke `before_mount` registered methods when `componentWillMount()`" do
       Foo.class_eval do
         before_mount :bar, :bar2
-        def bar; end
-        def bar2; end
+
+        def bar;
+        end
+
+        def bar2;
+        end
       end
 
       expect_any_instance_of(Foo).to receive(:bar)
@@ -62,8 +68,12 @@ describe React::Component do
     it "should invoke `after_mount` registered methods when `componentDidMount()`" do
       Foo.class_eval do
         after_mount :bar3, :bar4
-        def bar3; end
-        def bar4; end
+
+        def bar3;
+        end
+
+        def bar4;
+        end
       end
 
       expect_any_instance_of(Foo).to receive(:bar3)
@@ -76,13 +86,18 @@ describe React::Component do
       stub_const 'FooBar', Class.new
       Foo.class_eval do
         before_mount :bar
-        def bar; end
+
+        def bar;
+        end
       end
 
       FooBar.class_eval do
         include React::Component
         after_mount :bar2
-        def bar2; end
+
+        def bar2;
+        end
+
         def render
           React.create_element("div") { "lorem" }
         end
@@ -112,6 +127,7 @@ describe React::Component do
       stub_const 'Foo', Class.new
       Foo.class_eval do
         include React::Component
+
         def render
           React.create_element("div") { "lorem" }
         end
@@ -122,6 +138,7 @@ describe React::Component do
       Foo.class_eval do
         define_state :foo
         before_mount :set_up
+
         def set_up
           self.foo = "bar"
         end
@@ -144,6 +161,7 @@ describe React::Component do
       Foo.class_eval do
         define_state(:foo) { 10 }
         before_mount :bump
+
         def bump
           self.foo = self.foo + 20
         end
@@ -157,6 +175,7 @@ describe React::Component do
       Foo.class_eval do
         define_state :foo, :foo2
         before_mount :set_up
+
         def set_up
           self.foo = 10
           self.foo2 = 20
@@ -180,7 +199,7 @@ describe React::Component do
     end
 
     it "should raise error if multiple states and block given at the same time" do
-      expect  {
+      expect {
         Foo.class_eval do
           define_state(:foo, :foo2) { 30 }
         end
@@ -190,6 +209,7 @@ describe React::Component do
     it "should get state in render method" do
       Foo.class_eval do
         define_state(:foo) { 10 }
+
         def render
           React.create_element("div") { self.foo }
         end
@@ -319,6 +339,53 @@ describe React::Component do
       end
     end
 
+    describe 'Prop receiving' do
+      before do
+        klass = Class.new do
+          include React::Component
+
+          define_state(:foo) { nil }
+
+          before_mount do
+            self.foo = params[:foo]
+          end
+
+          before_receive_props do |new_props|
+            self.foo = new_props[:foo]
+          end
+
+          def render
+            div { self.foo }
+          end
+        end
+        stub_const 'PropRecv', Class.new
+        PropRecv.class_eval do
+          include React::Component
+
+          define_state(:foo) { nil }
+
+          before_mount do
+            self.foo = 10
+            block = lambda do
+              self.foo = 20
+            end
+            `setTimeout(#{block}, 1000)`
+          end
+
+          define_method(:render) do
+            present klass, foo: self.foo
+          end
+        end
+      end
+
+      it 'converts native objects' do
+        rendered = renderToDocument PropRecv
+        delay_with_promise 2 do
+          expect(rendered.dom_node.innerHTML).to eq('20')
+        end
+      end
+    end
+
     describe "Prop validation" do
       before do
         stub_const 'Foo', Class.new
@@ -347,7 +414,9 @@ describe React::Component do
             optional :bar, type: String
           end
 
-          def render; div; end
+          def render;
+            div;
+          end
         end
 
         %x{
@@ -372,10 +441,12 @@ describe React::Component do
           end
 
           params do
-           optional :bar, type: String
+            optional :bar, type: String
           end
 
-          def render; div; end
+          def render;
+            div;
+          end
         end
 
         %x{
@@ -397,7 +468,9 @@ describe React::Component do
             optional :bar, type: String
           end
 
-          def render; div; end
+          def render;
+            div;
+          end
         end
 
         %x{
@@ -422,7 +495,7 @@ describe React::Component do
           end
 
           def render
-            div { params[:foo] + "-" + params[:bar]}
+            div { params[:foo] + "-" + params[:bar] }
           end
         end
 
@@ -481,7 +554,7 @@ describe React::Component do
         after_mount :setup
 
         def setup
-          self.emit(:foo_invoked, [1,2,3], "bar")
+          self.emit(:foo_invoked, [1, 2, 3], "bar")
         end
 
         def render
@@ -492,7 +565,7 @@ describe React::Component do
       expect { |b|
         element = React.create_element(Foo).on(:foo_invoked, &b)
         renderElementToDocument(element)
-      }.to yield_with_args([1,2,3], "bar")
+      }.to yield_with_args([1, 2, 3], "bar")
     end
   end
 
@@ -547,6 +620,7 @@ describe React::Component do
       stub_const 'Bar', Class.new
       Bar.class_eval do
         include React::Component
+
         def render
           div do
             present Foo, foo: "astring"
