@@ -40,6 +40,12 @@ describe React::Component do
       end
     end
 
+    it 'sets the display name' do
+      klass = React::API.native_component_class Foo
+      display_name = `#{klass}.displayName`
+      expect(display_name).to eq 'Foo'
+    end
+
     it "should invoke `before_mount` registered methods when `componentWillMount()`" do
       Foo.class_eval do
         before_mount :bar, :bar2
