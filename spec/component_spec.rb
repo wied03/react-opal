@@ -356,7 +356,10 @@ describe React::Component do
 
       it "should allow params to be appended to" do
         stub_const 'Lorem', Class.new
-        Foo.class_eval do
+        stub_const 'Foo2', Class.new
+        Foo2.class_eval do
+          include React::Component
+
           params do
             requires :foo
             requires :lorem, type: Lorem
@@ -374,9 +377,9 @@ describe React::Component do
           var org_console = window.console;
           window.console = {warn: function(str){log.push(str)}}
         }
-        renderToDocument(Foo, bar: 10, lorem: Lorem.new)
+        renderToDocument(Foo2, bar: 10, lorem: Lorem.new)
         `window.console = org_console;`
-        expect(`log`).to eq(["Warning: Failed propType: In component `Foo`\nRequired prop `foo` was not specified\nProvided prop `bar` was not the specified type `String`"])
+        expect(`log`).to eq(["Warning: Failed propType: In component `Foo2`\nRequired prop `foo` was not specified\nProvided prop `bar` was not the specified type `String`"])
       end
 
       it "should not log anything if validation pass" do
