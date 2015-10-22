@@ -30,3 +30,5 @@ node_modules
 .bundle
 
 Gemfile.lock
+
+/gemfiles/*.lock
