@@ -351,9 +351,9 @@ describe React::Component do
         }
         renderToDocument(Foo, bar: 10, lorem: Lorem.new)
         `window.console = org_console;`
-        expect(`log`).to eq(["Warning: In component `Foo`\nRequired prop `foo` was not specified\nProvided prop `bar` was not the specified type `String`"])
+        expect(`log`).to eq(["Warning: Failed propType: In component `Foo`\nRequired prop `foo` was not specified\nProvided prop `bar` was not the specified type `String`"])
       end
-      
+
       it "should allow params to be appended to" do
         stub_const 'Lorem', Class.new
         Foo.class_eval do
@@ -361,14 +361,14 @@ describe React::Component do
             requires :foo
             requires :lorem, type: Lorem
           end
-          
+
           params do
            optional :bar, type: String
           end
 
           def render; div; end
         end
-        
+
         %x{
           var log = [];
           var org_console = window.console;
@@ -376,7 +376,7 @@ describe React::Component do
         }
         renderToDocument(Foo, bar: 10, lorem: Lorem.new)
         `window.console = org_console;`
-        expect(`log`).to eq(["Warning: In component `Foo`\nRequired prop `foo` was not specified\nProvided prop `bar` was not the specified type `String`"])
+        expect(`log`).to eq(["Warning: Failed propType: In component `Foo`\nRequired prop `foo` was not specified\nProvided prop `bar` was not the specified type `String`"])
       end
 
       it "should not log anything if validation pass" do

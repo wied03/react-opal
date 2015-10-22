@@ -1,7 +1,6 @@
-require "./ext/string"
 require 'active_support/core_ext/class/attribute'
 require 'react/callbacks'
-require "react/ext/hash"
+require 'react/ext/hash'
 
 module React
   module Component
@@ -38,7 +37,7 @@ module React
     end
 
     def emit(event_name, *args)
-      self.params["_on#{event_name.to_s.event_camelize}"].call(*args)
+      self.params["_on#{event_name.to_s.camelize}"].call(*args)
     end
 
     def component_will_mount

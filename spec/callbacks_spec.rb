@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'react/callbacks'
 
 describe React::Callbacks do
   it "should be able to define callback" do

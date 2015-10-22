@@ -10,7 +10,6 @@ else
   require 'tilt'
   require 'opal'
   require 'react/version'
-  require 'opal-activesupport'
   require 'react/ext/jsx_support'
 
   Opal.append_path File.expand_path('../', __FILE__).untaint
