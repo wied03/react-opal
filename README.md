@@ -1,11 +1,11 @@
-# React.rb
+# React-opal
 
-[![Build Status](http://img.shields.io/travis/wied03/react.rb/master.svg?style=flat)](http://travis-ci.org/wied03/react.rb)
+[![Build Status](http://img.shields.io/travis/wied03/react-opal/master.svg?style=flat)](http://travis-ci.org/wied03/react-opal)
 
 **This React.rb is a a fork of the original [React.rb](https://github.com/zetachang/react.rb)  [Opal Ruby](http://opalrb.org) wrapper of [React.js library](http://facebook.github.io/react/)**.
 
 ## Why fork?
-* Keep it simple, don't create an entire framework
+* Keep it simple, don't create an entire framework, just focus on React and Opal
 * Test driven development is important
 
 It lets you write reactive UI components, with Ruby's elegance and compiled to run in JavaScript. :heart:
@@ -15,17 +15,19 @@ It lets you write reactive UI components, with Ruby's elegance and compiled to r
 # TBD
 ```ruby
 # Gemfile
-gem "react.rb"
+gem "react-opal"
 ```
 
 and in your Opal application,
 
 ```ruby
 require "opal"
-require "react"
+require "react-opal"
 
 React.render(React.create_element('h1'){ "Hello World!" }, `document.body`)
 ```
+
+Note: This library does not directly include a react source dependency. This allows you to specify on your own (NPM, Bower, GEMs, etc.) how you wish to use React.
 
 For integration with server (Sinatra, etc), see setup of [TodoMVC](examples/todos) or the [official docs](http://opalrb.org/docs/) of Opal.
 
@@ -46,6 +48,12 @@ puts React.render_to_static_markup(React.create_element(HelloMessage))
 
 # => '<div>Hello World!</div>'
 ```
+
+## Testing your components
+
+You can use whatever opal friendly testing framework you want. Make sure that if you're using Phantom JS 1.98, you include the es5-shim before the React dependency
+
+More to come about how we do this internally with opal-rspec.
 
 ### More complicated one
 
@@ -136,37 +144,6 @@ def render
   end
 end
 ```
-
-### JSX Support
-
-Not a fan of using element building DSL? Use file extension `.jsx.rb` to get JSX fragment compiled.
-
-```ruby
-# app.jsx.rb
-class Fancy
-  def render
-    `<div>"this is fancy"</div>`
-  end
-end
-
-class App
-  include React::Component
-
-  def render
-    element = %x{ 
-      <div>
-        <h1>Outer</h1>
-        <Fancy>{ #{5.times.to_a.join(",")} }</Fancy>
-      </div>
-    }
-    element
-  end
-end
-
-React.expose_native_class(Fancy)
-
-React.render React.create_element(App), `document.body`
-``` 
 
 ### Props validation
 

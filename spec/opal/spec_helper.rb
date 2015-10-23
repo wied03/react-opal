@@ -3,7 +3,7 @@ require 'es5-shim'
 # actual react source
 require 'react-with-addons'
 # react.rb wrapper
-require 'react'
+require 'react-opal'
 
 module ReactTestHelpers
   `var ReactTestUtils = React.addons.TestUtils`

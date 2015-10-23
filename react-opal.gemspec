@@ -1,8 +1,8 @@
 # -*- encoding: utf-8 -*-
-require File.expand_path('../lib/react/version', __FILE__)
+require File.expand_path('../lib/react/opal/version', __FILE__)
 
 Gem::Specification.new do |s|
-  s.name         = 'react.rb'
+  s.name         = 'react-opal'
   s.version      = React::VERSION
   s.author       = 'Brady Wied'
   s.email        = 'brady@bswtechconsulting.co'
@@ -14,9 +14,8 @@ Gem::Specification.new do |s|
   s.files          = `git ls-files`.split("\n")
   s.executables    = `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) }
   s.test_files     = `git ls-files -- {test,spec,features}/*`.split("\n")
-  s.require_paths  = ['lib', 'vendor']
+  s.require_paths  = %w(lib vendor)
 
   s.add_runtime_dependency 'opal', '>= 0.8.0'
   s.add_runtime_dependency 'opal-activesupport'
-  s.add_runtime_dependency 'react-jsx', '~> 0.8.0'
 end

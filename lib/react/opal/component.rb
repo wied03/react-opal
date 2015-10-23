@@ -1,6 +1,6 @@
 require 'active_support/core_ext/class/attribute'
-require 'react/callbacks'
-require 'react/ext/hash'
+require 'react/opal/callbacks'
+require 'react/opal/ext/hash'
 
 module React
   module Component
