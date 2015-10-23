@@ -8,7 +8,6 @@ matrix:
   fast_finish: true
 
   include:
-    - rvm: 2.1.0
     - rvm: 2.2.3
     - rvm: 2.2.3
       gemfile: gemfiles/opal_master.gemfile
