@@ -1,5 +1,9 @@
 require "spec_helper"
 
+RSpec.configure do |c|
+  c.full_description = 'React::Component context'
+end
+
 describe React::Component do
   after(:each) do
     React::API.clear_component_class_cache
@@ -345,42 +349,119 @@ describe React::Component do
   end
 
   describe 'context' do
-    let(:wrapper) do
-      inner_klass = klass
-      Class.new do
-        include React::Component
-
-        provide_context(:foo) do
-          params[:foo_for_context]
-        end
-
-        define_method(:render) do
-          present inner_klass
-        end
-      end
-    end
-
-    subject {
-      rendered = renderToDocument wrapper, foo_for_context: 20
-      rendered.dom_node.innerHTML
-    }
-
-    let(:klass) do
-      Class.new do
-        include React::Component
-
-        consume_context(:foo)
-
-        def render
-          puts "context is #{self.context[:foo]}"
-
-          div { self.context[:foo] }
-        end
-      end
-    end
-
     context 'single value' do
-      it { is_expected.to eq '20' }
+
+      let(:wrapper) do
+        inner_klass = klass
+        val_type = value_type
+        Class.new do
+          include React::Component
+
+          provide_context(:foo, val_type) do
+            params[:foo_for_context]
+          end
+
+          define_method(:render) do
+            present inner_klass
+          end
+        end
+      end
+
+      subject {
+        rendered = renderToDocument wrapper, foo_for_context: value
+        rendered.dom_node.innerHTML
+      }
+
+      let(:renderer) do
+        lambda do |value|
+          value
+        end
+      end
+
+      let(:klass) do
+        val_type = value_type
+        r = renderer
+        Class.new do
+          include React::Component
+
+          consume_context(:foo, val_type)
+
+          define_method(:render) do
+            div { r[self.context[:foo]] }
+          end
+        end
+      end
+
+      context 'number' do
+        let(:value_type) { Fixnum }
+        let(:value) { 20 }
+
+        it { is_expected.to eq '20' }
+      end
+
+      context 'string' do
+        let(:value_type) { String }
+        let(:value) { 'howdy' }
+
+        it { is_expected.to eq 'howdy' }
+      end
+
+      context 'array' do
+        let(:value_type) { Array }
+        let(:renderer) do
+          lambda do |value|
+            value[0]
+          end
+        end
+        let(:value) { ['howdy'] }
+
+        it { is_expected.to eq 'howdy' }
+      end
+
+      context 'native hash' do
+        let(:value_type) { `Object` }
+        let(:renderer) do
+          lambda do |value|
+            value[:stuff]
+          end
+        end
+        let(:value) { `{stuff: 'howdy'}` }
+
+        it { is_expected.to eq 'howdy' }
+      end
+
+      context 'Ruby hash' do
+        let(:value_type) { Hash }
+        let(:renderer) do
+          lambda do |value|
+            value[:stuff]
+          end
+        end
+        let(:value) { {stuff: 'howdy'} }
+
+        it { is_expected.to eq 'howdy' }
+      end
+
+      context 'custom type' do
+        before do
+          stub_const 'ContextType', Class.new
+          ContextType.class_eval do
+            def stuff
+              22
+            end
+          end
+        end
+
+        let(:value_type) { ContextType }
+        let(:renderer) do
+          lambda do |value|
+            value.stuff
+          end
+        end
+        let(:value) { ContextType.new }
+
+        it { is_expected.to eq '22' }
+      end
     end
   end
 

@@ -158,14 +158,26 @@ module React
         end
       end
 
-      def consume_context(item)
-        self.context_types ||= {}
-        self.context_types[item] = `React.PropTypes.number`
+      def get_prop_type(klass)
+        if klass.is_a?(Proc)
+          `React.PropTypes.object`
+        elsif klass.ancestors.include?(Numeric)
+          `React.PropTypes.number`
+        elsif klass == String
+          `React.PropTypes.string`
+        else
+          `React.PropTypes.object`
+        end
       end
 
-      def provide_context(item, &block)
+      def consume_context(item, klass)
+        self.context_types ||= {}
+        self.context_types[item] = get_prop_type(klass)
+      end
+
+      def provide_context(item, klass, &block)
         self.child_context_types ||= {}
-        self.child_context_types[item] = `React.PropTypes.number`
+        self.child_context_types[item] = get_prop_type(klass)
         define_method(:get_child_context) do
           {
               item => instance_eval(&block)
