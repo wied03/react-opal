@@ -1,4 +1,8 @@
-require 'react_source'
+# polyfill needed for phantom
+require 'es5-shim'
+# actual react source
+require 'react-with-addons'
+# react.rb wrapper
 require 'react'
 
 module ReactTestHelpers
