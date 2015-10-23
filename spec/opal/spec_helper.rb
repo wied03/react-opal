@@ -1,6 +1,4 @@
-# Need a Phantom polyfill to Run React on it
-require 'es5-shim/es5-shim'
-require 'react-with-addons'
+require 'react_source'
 require 'react'
 
 module ReactTestHelpers
