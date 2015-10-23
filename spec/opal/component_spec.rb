@@ -1,9 +1,5 @@
 require "spec_helper"
 
-RSpec.configure do |c|
-  c.full_description = 'React::Component context'
-end
-
 describe React::Component do
   after(:each) do
     React::API.clear_component_class_cache
