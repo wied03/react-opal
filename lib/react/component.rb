@@ -8,7 +8,7 @@ module React
       base.include(API)
       base.include(React::Callbacks)
       base.class_eval do
-        class_attribute :init_state, :validator, :context_types, :child_context_types
+        class_attribute :init_state, :validator, :context_types, :child_context_types, :child_context_get
         define_callback :before_mount
         define_callback :after_mount
         define_callback :before_receive_props
@@ -165,6 +165,8 @@ module React
           `React.PropTypes.number`
         elsif klass == String
           `React.PropTypes.string`
+        elsif klass == Array
+          `React.PropTypes.array`
         else
           `React.PropTypes.object`
         end
@@ -178,10 +180,14 @@ module React
       def provide_context(item, klass, &block)
         self.child_context_types ||= {}
         self.child_context_types[item] = get_prop_type(klass)
-        define_method(:get_child_context) do
-          {
-              item => instance_eval(&block)
-          }
+        self.child_context_get ||= {}
+        self.child_context_get[item] = block
+        unless method_defined?(:get_child_context)
+          define_method(:get_child_context) do
+            Hash[self.child_context_get.map do |item, blk|
+                   [item, instance_eval(&blk)]
+                 end]
+          end
         end
       end
 

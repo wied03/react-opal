@@ -350,7 +350,6 @@ describe React::Component do
 
   describe 'context' do
     context 'single value' do
-
       let(:wrapper) do
         inner_klass = klass
         val_type = value_type
@@ -462,6 +461,47 @@ describe React::Component do
 
         it { is_expected.to eq '22' }
       end
+    end
+
+    context 'multiple values' do
+      let(:wrapper) do
+        inner_klass = klass
+        Class.new do
+          include React::Component
+
+          provide_context(:foo, String) do
+            params[:string_param]
+          end
+
+          provide_context(:bar, Fixnum) do
+            params[:int_param]
+          end
+
+          define_method(:render) do
+            present inner_klass
+          end
+        end
+      end
+
+      subject {
+        rendered = renderToDocument wrapper, string_param: 'howdy', int_param: 22
+        rendered.dom_node.innerHTML
+      }
+
+      let(:klass) do
+        Class.new do
+          include React::Component
+
+          consume_context(:foo, String)
+          consume_context(:bar, Fixnum)
+
+          def render
+            div { "#{self.context[:foo]} #{self.context[:bar]}" }
+          end
+        end
+      end
+
+      it { is_expected.to eq 'howdy 22' }
     end
   end
 
