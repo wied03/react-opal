@@ -17,5 +17,5 @@ Gem::Specification.new do |s|
   s.require_paths  = %w(lib vendor)
 
   s.add_runtime_dependency 'opal', '>= 0.8.0'
-  s.add_runtime_dependency 'opal-activesupport'
+  s.add_runtime_dependency 'opal-activesupport', '>= 0.2.0'
 end
