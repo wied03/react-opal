@@ -5,8 +5,8 @@ Gem::Specification.new do |s|
   s.name         = 'react-opal'
   s.version      = React::VERSION
   s.author       = 'Brady Wied'
-  s.email        = 'brady@bswtechconsulting.co'
-  s.homepage     = 'https://github.com/wied03/react.rb'
+  s.email        = 'brady@bswtechconsulting.com'
+  s.homepage     = 'https://github.com/wied03/react-opal'
   s.summary      = 'Opal Ruby wrapper of React.js library.'
   s.license      = 'MIT'
   s.description  = "Write reactive UI component with Ruby's elegancy and compiled to run in Javascript."
