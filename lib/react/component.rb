@@ -8,7 +8,7 @@ module React
       base.include(API)
       base.include(React::Callbacks)
       base.class_eval do
-        class_attribute :init_state, :validator
+        class_attribute :init_state, :validator, :context_types, :child_context_types, :child_context_get
         define_callback :before_mount
         define_callback :after_mount
         define_callback :before_receive_props
@@ -29,6 +29,10 @@ module React
 
     def refs
       Hash.new(`#{@native}.refs`)
+    end
+
+    def context
+      Hash.new(`#{@native}.context`)
     end
 
     def state
@@ -109,7 +113,7 @@ module React
       def prop_types
         if self.validator
           {
-            _componentValidator: %x{
+              _componentValidator: %x{
               function(props, propName, componentName) {
                 var errors = #{validator.validate(Hash.new(`props`))};
                 var error = new Error(#{"In component `" + self.name + "`\n" + `errors`.join("\n")});
@@ -135,6 +139,55 @@ module React
           self.validator.evaluate_more_rules(&block)
         else
           self.validator = React::Validator.build(&block)
+        end
+      end
+
+      def define_state_prop(prop, &block)
+        define_state prop
+        update_value = lambda do |new_value|
+          new_value = instance_exec(new_value, &block) if block
+          self.send("#{prop}=", new_value)
+        end
+        before_mount do
+          # need to execute in context of each object
+          instance_exec params[prop], &update_value
+        end
+        before_receive_props do |new_props|
+          # need to execute in context of each object
+          instance_exec new_props[prop], &update_value
+        end
+      end
+
+      def get_prop_type(klass)
+        if klass.is_a?(Proc)
+          `React.PropTypes.object`
+        elsif klass.ancestors.include?(Numeric)
+          `React.PropTypes.number`
+        elsif klass == String
+          `React.PropTypes.string`
+        elsif klass == Array
+          `React.PropTypes.array`
+        else
+          `React.PropTypes.object`
+        end
+      end
+
+      def consume_context(item, klass)
+        self.context_types ||= {}
+        self.context_types[item] = get_prop_type(klass)
+      end
+
+      def provide_context(item, klass, &block)
+        self.child_context_types ||= {}
+        self.child_context_types[item] = get_prop_type(klass)
+        self.child_context_get ||= {}
+        self.child_context_get[item] = block
+        unless method_defined?(:get_child_context)
+          define_method(:get_child_context) do
+            Hash[self.child_context_get.map do |item, blk|
+                   [item, instance_eval(&blk)]
+                 end]
+          end
         end
       end
 
@@ -175,7 +228,7 @@ module React
       def set_props(prop, &block)
         raise "No native ReactComponent associated" unless @native
         %x{
-          #{@native}.setProps(#{prop.shallow_to_n}, function(){
+        #{@native}.setProps(#{prop.shallow_to_n}, function(){
             #{block.call if block}
           });
         }
@@ -184,7 +237,7 @@ module React
       def set_props!(prop, &block)
         raise "No native ReactComponent associated" unless @native
         %x{
-          #{@native}.replaceProps(#{prop.shallow_to_n}, function(){
+        #{@native}.replaceProps(#{prop.shallow_to_n}, function(){
             #{block.call if block}
           });
         }
@@ -193,7 +246,7 @@ module React
       def set_state(state, &block)
         raise "No native ReactComponent associated" unless @native
         %x{
-          #{@native}.setState(#{state.shallow_to_n}, function(){
+        #{@native}.setState(#{state.shallow_to_n}, function(){
             #{block.call if block}
           });
         }
@@ -202,7 +255,7 @@ module React
       def set_state!(state, &block)
         raise "No native ReactComponent associated" unless @native
         %x{
-          #{@native}.replaceState(#{state.shallow_to_n}, function(){
+        #{@native}.replaceState(#{state.shallow_to_n}, function(){
             #{block.call if block}
           });
         }

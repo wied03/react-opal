@@ -1,6 +1,16 @@
 language: ruby
+sudo: false
 
-rvm:
-  - 2.0.0
-  - 2.1
-  - 2.2.3
+cache:
+  bundler: true
+
+matrix:
+  fast_finish: true
+
+  include:
+    - rvm: 2.2.3
+    - rvm: 2.2.3
+      gemfile: gemfiles/opal_master.gemfile
+
+script:
+  - "bundle exec rake"

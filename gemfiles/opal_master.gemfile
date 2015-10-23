@@ -1,8 +1,9 @@
 source 'https://rubygems.org'
 
-gemspec
+gemspec path: '../'
 
 gem 'rake'
+gem 'opal', git: 'https://github.com/opal/opal.git'
 gem 'react-source', '~> 0.13'
 gem 'sinatra'
 gem 'opal-jquery'

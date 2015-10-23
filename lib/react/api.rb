@@ -9,7 +9,7 @@ module React
       if `(typeof type === 'function')`
         params << type
       elsif type.kind_of?(Class)
-        raise "Provided class should define `render` method"  if !(type.method_defined? :render)
+        raise "Provided class should define `render` method" if !(type.method_defined? :render)
         params << self.native_component_class(type)
       else
         raise "#{type} not implemented" unless HTML_TAGS.include?(type)
@@ -19,11 +19,11 @@ module React
       # Passed in properties
       props = {}
       properties.map do |key, value|
-         if key == "class_name" && value.is_a?(Hash)
-           props[lower_camelize(key)] = value.inject([]) {|ary, (k,v)| v ? ary.push(k) : ary}.join(" ")
-         else
-           props[React::ATTRIBUTES.include?(lower_camelize(key)) ? lower_camelize(key) : key] = value
-         end
+        if key == "class_name" && value.is_a?(Hash)
+          props[lower_camelize(key)] = value.inject([]) { |ary, (k, v)| v ? ary.push(k) : ary }.join(" ")
+        else
+          props[React::ATTRIBUTES.include?(lower_camelize(key)) ? lower_camelize(key) : key] = value
+        end
       end
       params << props.shallow_to_n
 
@@ -45,11 +45,17 @@ module React
       @@component_classes[type.to_s] ||= %x{
         React.createClass({
           propTypes: #{type.respond_to?(:prop_types) ? type.prop_types.to_n : `{}`},
+          contextTypes: #{type.respond_to?(:context_types) ? type.context_types.to_n : `{}`},
+          childContextTypes: #{type.respond_to?(:child_context_types) ? type.child_context_types.to_n : `{}`},
           getDefaultProps: function(){
             return #{type.respond_to?(:default_props) ? type.default_props.to_n : `{}`};
           },
           getInitialState: function(){
             return #{type.respond_to?(:initial_state) ? type.initial_state.to_n : `{}`};
+          },
+          getChildContext: function() {
+            var instance = this._getOpalInstance.apply(this);
+            return #{type.method_defined?(:get_child_context) ? `instance`.get_child_context.to_n : `{}`};
           },
           componentWillMount: function() {
             var instance = this._getOpalInstance.apply(this);
@@ -102,7 +108,7 @@ module React
     def self.lower_camelize(snake_cased_word)
       words = snake_cased_word.split("_")
       result = [words.first]
-      result.concat(words[1..-1].map {|word| word[0].upcase + word[1..-1] })
+      result.concat(words[1..-1].map { |word| word[0].upcase + word[1..-1] })
       result.join("")
     end
   end
