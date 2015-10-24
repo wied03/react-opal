@@ -484,7 +484,162 @@ describe React::Component do
   end
 
   describe 'context' do
-    pending 'write this'
+    context 'single value' do
+      let(:wrapper) do
+        inner_klass = klass
+        val_type = value_type
+        Class.new do
+          include React::Component
+
+          provide_context(:foo, val_type) do
+            params[:foo_for_context]
+          end
+
+          define_method(:render) do
+            present inner_klass
+          end
+        end
+      end
+
+      subject {
+        rendered = render_to_document(React.create_element(wrapper, foo_for_context: value))
+        dom_node = React.find_dom_node rendered
+        `#{dom_node}.innerHTML`
+      }
+
+      let(:renderer) do
+        lambda do |value|
+          value
+        end
+      end
+
+      let(:klass) do
+        val_type = value_type
+        r = renderer
+        Class.new do
+          include React::Component
+
+          consume_context(:foo, val_type)
+
+          define_method(:render) do
+            div { r[self.context[:foo]] }
+          end
+        end
+      end
+
+      context 'number' do
+        let(:value_type) { Fixnum }
+        let(:value) { 20 }
+
+        it { is_expected.to eq '20' }
+      end
+
+      context 'string' do
+        let(:value_type) { String }
+        let(:value) { 'howdy' }
+
+        it { is_expected.to eq 'howdy' }
+      end
+
+      context 'array' do
+        let(:value_type) { Array }
+        let(:renderer) do
+          lambda do |value|
+            value[0]
+          end
+        end
+        let(:value) { ['howdy'] }
+
+        it { is_expected.to eq 'howdy' }
+      end
+
+      context 'native hash' do
+        let(:value_type) { `Object` }
+        let(:renderer) do
+          lambda do |value|
+            value[:stuff]
+          end
+        end
+        let(:value) { `{stuff: 'howdy'}` }
+
+        it { is_expected.to eq 'howdy' }
+      end
+
+      context 'Ruby hash' do
+        let(:value_type) { Hash }
+        let(:renderer) do
+          lambda do |value|
+            value[:stuff]
+          end
+        end
+        let(:value) { {stuff: 'howdy'} }
+
+        it { is_expected.to eq 'howdy' }
+      end
+
+      context 'custom type' do
+        before do
+          stub_const 'ContextType', Class.new
+          ContextType.class_eval do
+            def stuff
+              22
+            end
+          end
+        end
+
+        let(:value_type) { ContextType }
+        let(:renderer) do
+          lambda do |value|
+            value.stuff
+          end
+        end
+        let(:value) { ContextType.new }
+
+        it { is_expected.to eq '22' }
+      end
+    end
+
+    context 'multiple values' do
+      let(:wrapper) do
+        inner_klass = klass
+        Class.new do
+          include React::Component
+
+          provide_context(:foo_camel, String) do
+            params[:string_param]
+          end
+
+          provide_context(:bar, Fixnum) do
+            params[:int_param]
+          end
+
+          define_method(:render) do
+            present inner_klass
+          end
+        end
+      end
+
+      subject {
+        rendered = render_to_document(React.create_element(wrapper, string_param: 'howdy', int_param: 22))
+        dom_node = React.find_dom_node rendered
+        `#{dom_node}.innerHTML`
+      }
+
+      let(:klass) do
+        Class.new do
+          include React::Component
+
+          consume_context(:foo_camel, String)
+          consume_context(:bar, Fixnum)
+
+          def render
+            div { "#{self.context[:foo_camel]} #{self.context[:bar]}" }
+          end
+        end
+      end
+
+      it { is_expected.to eq 'howdy 22' }
+    end
   end
 
   describe "Event handling" do

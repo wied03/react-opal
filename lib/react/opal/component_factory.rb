@@ -21,6 +21,7 @@ module React
         optional_native_alias[:componentWillUpdate, :component_will_update]
         optional_native_alias[:componentDidUpdate, :component_did_update]
         optional_native_alias[:componentWillUnmount, :component_will_unmount]
+        optional_native_alias[:getChildContext, :get_child_context]
         native_alias :render, :render
       end
       %x{
@@ -64,6 +65,8 @@ module React
         ctor.prototype = klass.$$proto;
         Object.assign(ctor.prototype, React.Component.prototype);
         ctor.propTypes = #{klass.respond_to?(:prop_types) ? klass.prop_types.to_n : `{}`};
+        ctor.contextTypes = #{klass.respond_to?(:context_types) ? klass.context_types.to_n : `{}`};
+        ctor.childContextTypes = #{klass.respond_to?(:child_context_types) ? klass.child_context_types.to_n : `{}`};
         ctor.defaultProps = #{klass.respond_to?(:default_props) ? klass.default_props.to_n : `{}`};
         ctor.displayName = #{klass.to_s};
       }
