@@ -11,24 +11,24 @@ module React
                 small source span strong style sub summary sup table tbody td textarea tfoot th
                 thead time title tr track u ul var video wbr)
 
-  def self.create_element(type, properties = {}, &block)
+  def self.create_element(type, properties = {})
     params = []
 
     # Component Spec or Nomral DOM
     params << if `(typeof type === 'function')`
-      type
-    elsif type.kind_of?(Class)
-      raise "Provided class should define `render` method"  if !(type.method_defined? :render)
-      React::ComponentFactory.native_component_class(type)
-    else
-      raise "#{type} not implemented" unless HTML_TAGS.include?(type)
-      type
-    end
+                type
+              elsif type.kind_of?(Class)
+                raise "Provided class should define `render` method" if !(type.method_defined? :render)
+                React::ComponentFactory.native_component_class(type)
+              else
+                raise "#{type} not implemented" unless HTML_TAGS.include?(type)
+                type
+              end
 
     # Passed in properties
     props = camel_case_hash_keys(properties) do |key, value|
       if key == "class_name" && value.is_a?(Hash)
-        value.inject([]) {|ary, (k,v)| v ? ary.push(k) : ary}.join(" ")
+        value.inject([]) { |ary, (k, v)| v ? ary.push(k) : ary }.join(" ")
       elsif key == 'value_link'
         process_value_link value
       else
@@ -40,7 +40,7 @@ module React
 
     # Children Nodes
     if block_given?
-      children = [yield].flatten.each do |ele|
+      [yield].flatten.each do |ele|
         params << ele
       end
     end
