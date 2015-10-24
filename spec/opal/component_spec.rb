@@ -413,7 +413,74 @@ describe React::Component do
   end
 
   describe 'set initial state from prop value' do
-    pending 'port this over'
+    let(:wrapper) do
+      inner_klass = klass
+      Class.new do
+        include React::Component
+
+        define_state(:foo) { nil }
+
+        before_mount do
+          self.foo = 10
+          block = lambda do
+            self.foo = 20
+          end
+          `setTimeout(#{block}, 1000)`
+        end
+
+        define_method(:render) do
+          present inner_klass, foo: self.foo
+        end
+      end
+    end
+
+    subject do
+      rendered = render_to_document(React.create_element(wrapper))
+      delay_with_promise 2 do
+        dom_node = React.find_dom_node rendered
+        `#{dom_node}.innerHTML`
+      end
+    end
+
+    context 'single value' do
+      context 'no block' do
+        let(:klass) do
+          Class.new do
+            include React::Component
+
+            define_state_prop :foo
+
+            def render
+              div { self.foo }
+            end
+          end
+        end
+
+        it { is_expected.to eq '20' }
+      end
+
+      context 'block' do
+        let(:klass) do
+          Class.new do
+            include React::Component
+
+            def process_value(new_value)
+              "hello #{new_value}"
+            end
+
+            define_state_prop :foo do |new_value|
+              process_value new_value
+            end
+
+            def render
+              div { self.foo }
+            end
+          end
+        end
+
+        it { is_expected.to eq 'hello 20' }
+      end
+    end
   end
 
   describe 'context' do

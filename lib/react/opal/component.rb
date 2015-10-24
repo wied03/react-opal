@@ -21,7 +21,7 @@ module React
     end
 
     def params
-      Hash.new(`#{self}.props`).inject({}) do |memo, (k,v)|
+      Hash.new(`#{self}.props`).inject({}) do |memo, (k, v)|
         memo[k.underscore] = v
         memo
       end
@@ -107,7 +107,7 @@ module React
       def prop_types
         if self.validator
           {
-            _componentValidator: %x{
+              _componentValidator: %x{
               function(props, propName, componentName) {
                 var errors = #{validator.validate(Hash.new(`props`))};
                 var error = new Error(#{"In component `" + self.name + "`\n" + `errors`.join("\n")});
@@ -133,6 +133,22 @@ module React
           self.validator.evaluate_more_rules(&block)
         else
           self.validator = React::Validator.build(&block)
+        end
+      end
+
+      def define_state_prop(prop, &block)
+        define_state prop
+        update_value = lambda do |new_value|
+          new_value = instance_exec(new_value, &block) if block
+          self.send("#{prop}=", new_value)
+        end
+        before_mount do
+          # need to execute in context of each object
+          instance_exec params[prop], &update_value
+        end
+        before_receive_props do |new_props|
+          # need to execute in context of each object
+          instance_exec new_props[prop], &update_value
         end
       end
 

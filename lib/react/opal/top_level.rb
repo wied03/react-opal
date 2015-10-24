@@ -95,6 +95,6 @@ module React
   end
 
   def self.find_dom_node(component)
-    `React.findDOMNode(component)`
+    `React.findDOMNode(#{component})`
   end
 end
