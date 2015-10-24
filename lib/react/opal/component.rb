@@ -1,6 +1,7 @@
 require 'active_support/core_ext/class/attribute'
 require 'react/opal/callbacks'
 require 'react/opal/ext/hash'
+require 'react/opal/component/api'
 
 module React
   module Component
@@ -8,7 +9,7 @@ module React
       base.include(API)
       base.include(React::Callbacks)
       base.class_eval do
-        class_attribute :init_state, :validator, :context_types, :child_context_types, :child_context_get
+        class_attribute :init_state, :validator
         define_callback :before_mount
         define_callback :after_mount
         define_callback :before_receive_props
@@ -19,29 +20,19 @@ module React
       base.extend(ClassMethods)
     end
 
-    def initialize(native_element)
-      @native = native_element
-    end
-
     def params
-      Hash.new(`#{@native}.props`)
+      Hash.new(`#{self}.props`).inject({}) do |memo, (k,v)|
+        memo[k.underscore] = v
+        memo
+      end
     end
 
     def refs
-      Hash.new(`#{@native}.refs`)
-    end
-
-    def context
-      Hash.new(`#{@native}.context`)
-    end
-
-    def state
-      raise "No native ReactComponent associated" unless @native
-      Hash.new(`#{@native}.state`)
+      Hash.new(`#{self}.refs`)
     end
 
     def emit(event_name, *args)
-      self.params["_on#{event_name.to_s.camelize}"].call(*args)
+      self.params["on_#{event_name.to_s}"].call(*args)
     end
 
     def component_will_mount
@@ -108,12 +99,15 @@ module React
       element
     end
 
+    def to_n
+      self
+    end
 
     module ClassMethods
       def prop_types
         if self.validator
           {
-              _componentValidator: %x{
+            _componentValidator: %x{
               function(props, propName, componentName) {
                 var errors = #{validator.validate(Hash.new(`props`))};
                 var error = new Error(#{"In component `" + self.name + "`\n" + `errors`.join("\n")});
@@ -142,55 +136,6 @@ module React
         end
       end
 
-      def define_state_prop(prop, &block)
-        define_state prop
-        update_value = lambda do |new_value|
-          new_value = instance_exec(new_value, &block) if block
-          self.send("#{prop}=", new_value)
-        end
-        before_mount do
-          # need to execute in context of each object
-          instance_exec params[prop], &update_value
-        end
-        before_receive_props do |new_props|
-          # need to execute in context of each object
-          instance_exec new_props[prop], &update_value
-        end
-      end
-
-      def get_prop_type(klass)
-        if klass.is_a?(Proc)
-          `React.PropTypes.object`
-        elsif klass.ancestors.include?(Numeric)
-          `React.PropTypes.number`
-        elsif klass == String
-          `React.PropTypes.string`
-        elsif klass == Array
-          `React.PropTypes.array`
-        else
-          `React.PropTypes.object`
-        end
-      end
-
-      def consume_context(item, klass)
-        self.context_types ||= {}
-        self.context_types[item] = get_prop_type(klass)
-      end
-
-      def provide_context(item, klass, &block)
-        self.child_context_types ||= {}
-        self.child_context_types[item] = get_prop_type(klass)
-        self.child_context_get ||= {}
-        self.child_context_get[item] = block
-        unless method_defined?(:get_child_context)
-          define_method(:get_child_context) do
-            Hash[self.child_context_get.map do |item, blk|
-                   [item, instance_eval(&blk)]
-                 end]
-          end
-        end
-      end
-
       def define_state(*states)
         raise "Block could be only given when define exactly one state" if block_given? && states.count > 1
 
@@ -202,12 +147,10 @@ module React
         states.each do |name|
           # getter
           define_method("#{name}") do
-            return unless @native
             self.state[name]
           end
           # setter
           define_method("#{name}=") do |new_state|
-            return unless @native
             hash = {}
             hash[name] = new_state
             self.set_state(hash)
@@ -215,50 +158,6 @@ module React
             new_state
           end
         end
-      end
-    end
-
-    module API
-      include Native
-
-      alias_native :dom_node, :getDOMNode
-      alias_native :mounted?, :isMounted
-      alias_native :force_update!, :forceUpdate
-
-      def set_props(prop, &block)
-        raise "No native ReactComponent associated" unless @native
-        %x{
-        #{@native}.setProps(#{prop.shallow_to_n}, function(){
-            #{block.call if block}
-          });
-        }
-      end
-
-      def set_props!(prop, &block)
-        raise "No native ReactComponent associated" unless @native
-        %x{
-        #{@native}.replaceProps(#{prop.shallow_to_n}, function(){
-            #{block.call if block}
-          });
-        }
-      end
-
-      def set_state(state, &block)
-        raise "No native ReactComponent associated" unless @native
-        %x{
-        #{@native}.setState(#{state.shallow_to_n}, function(){
-            #{block.call if block}
-          });
-        }
-      end
-
-      def set_state!(state, &block)
-        raise "No native ReactComponent associated" unless @native
-        %x{
-        #{@native}.replaceState(#{state.shallow_to_n}, function(){
-            #{block.call if block}
-          });
-        }
       end
     end
   end
