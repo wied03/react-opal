@@ -222,7 +222,7 @@ describe React do
     elements.any? ? elements : nil
   end
 
-  def change_value_in_element_select(element, value, element_type=:select)
+  def change_value_in_element(element, value, element_type=:select)
     rendered = `React.addons.TestUtils.renderIntoDocument(#{element})`
     parent_node = React.find_dom_node rendered
     element = Element.find(parent_node).find(element_type)
@@ -305,7 +305,7 @@ describe React do
 
       describe 'after change' do
         before do
-          change_value_in_element_select element, '2'
+          change_value_in_element element, '2'
         end
 
         subject { actual_value[:set] }
@@ -327,7 +327,7 @@ describe React do
 
       describe 'after change' do
         before do
-          change_value_in_element_select element, '2'
+          change_value_in_element element, '2'
         end
 
         subject { actual_value[:set] }
@@ -363,7 +363,7 @@ describe React do
 
       describe 'after change' do
         before do
-          change_value_in_element_select element, '2', element_type=:input
+          change_value_in_element element, '2', element_type=:input
         end
 
         subject { actual_value[:set] }
