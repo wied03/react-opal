@@ -57,13 +57,13 @@ describe React do
       it "should create element with only one children correctly" do
         element = React.create_element(Foo) { React.create_element('span') }
         expect(element.children.count).to eq(1)
-        expect(element.children.map{|e| e.element_type }).to eq(["span"])
+        expect(element.children.map { |e| e.element_type }).to eq(["span"])
       end
 
       it "should create element with more than one children correctly" do
         element = React.create_element(Foo) { [React.create_element('span'), React.create_element('span')] }
         expect(element.children.count).to eq(2)
-        expect(element.children.map{|e| e.element_type }).to eq(["span", "span"])
+        expect(element.children.map { |e| e.element_type }).to eq(["span", "span"])
       end
 
       it "should create a valid element provided class defined `render`" do
@@ -83,6 +83,7 @@ describe React do
       it "should use the same instance for the same ReactComponent" do
         Foo.class_eval do
           attr_accessor :a
+
           def initialize(n)
             self.a = 10
           end
@@ -106,6 +107,7 @@ describe React do
           def initialize
             `count = count + 1;`
           end
+
           def render
             React.create_element("div")
           end
@@ -195,7 +197,7 @@ describe React do
   describe "unmount_component_at_node" do
     async "should unmount component at node" do
       div = `document.createElement("div")`
-      React.render(React.create_element('span') { "lorem" }, div ) do
+      React.render(React.create_element('span') { "lorem" }, div) do
         run_async {
           expect(React.unmount_component_at_node(div)).to eq(true)
         }
@@ -220,64 +222,72 @@ describe React do
     elements.any? ? elements : nil
   end
 
-  def change_value_in_element_select(element, value)
+  def change_value_in_element_select(element, value, element_type=:select)
     rendered = `React.addons.TestUtils.renderIntoDocument(#{element})`
     parent_node = React.find_dom_node rendered
-    select = Element.find(parent_node).find('select')
-    select_native = select.get()[0]
-    `React.addons.TestUtils.Simulate.change(#{select_native}, {target: {value: #{value}}})`
+    element = Element.find(parent_node).find(element_type)
+    element_native = element.get()[0]
+    `React.addons.TestUtils.Simulate.change(#{element_native}, {target: {value: #{value}}})`
   end
 
   RSpec::Matchers.define :contain_dom_element do |element_type|
-     match do |react_element|
-       @element = find_element_jq_node react_element, element_type
-       next false unless @element
-       # Don't make the test get the type exactly right
-       @element.value.to_s == @expected_value.to_s
-     end
+    match do |react_element|
+      @element = find_element_jq_node react_element, element_type
+      next false unless @element
+      # Don't make the test get the type exactly right
+      @element.value.to_s == @expected_value.to_s
+    end
 
-     failure_message do |react_element|
-       if @element
-         "Found select, but value was '#{@element.value}' and we expected '#{@expected_value}'"
-       else
-         "Expected rendered element to contain a #{element_type}, but it did not, did contain this: #{Native(get_dom_node(react_element)).outerHTML}"
-       end
-     end
-
-     chain :with_selected_value do |expected_value|
-       @expected_value = expected_value
-     end
-   end
-
-  describe 'value_link' do
-    class ::OptionTest
-      include React::Component
-
-      def render
-        option value: params[:value]
+    failure_message do |react_element|
+      if @element
+        "Found element, but value was '#{@element.value}' and we expected '#{@expected_value}'"
+      else
+        "Expected rendered element to contain a #{element_type}, but it did not, did contain this: #{Native(get_dom_node(react_element)).outerHTML}"
       end
     end
 
-    class ::ValueLinkTest
-      include React::Component
+    chain :with_selected_value do |expected_value|
+      @expected_value = expected_value
+    end
+  end
 
-      def render
-        div do
-          select id: 'the_select_box', value_link: params[:value_link] do
-            params[:options].map do |option|
-              present OptionTest, value: option[:value]
+  describe 'value_link' do
+    let(:actual_value) { {} }
+
+    let(:option_klass) {
+      Class.new do
+        include React::Component
+
+        def render
+          option value: params[:value]
+        end
+      end
+    }
+
+    let(:select_klass) {
+      opt_klass = option_klass
+      Class.new do
+        include React::Component
+
+        define_method(:render) do
+          div do
+            select id: 'the_select_box', value_link: params[:value_link] do
+              params[:options].map do |option|
+                present opt_klass, value: option[:value]
+              end
             end
           end
         end
       end
-    end
+    }
 
     subject(:element) {
-      React.create_element ::ValueLinkTest, value_link: value_link, options: [{value:'2'}, {value: '3'}]
+      React.create_element select_klass,
+                           value_link: value_link,
+                           options: [{value: '2'}, {value: '3'}]
     }
 
     context 'via method' do
-      let(:actual_value) { {} }
       let(:value_link) { method_value_link }
 
       def req_change_via_method(new_value)
@@ -305,9 +315,8 @@ describe React do
     end
 
     context 'via lambda' do
-      let(:actual_value) { {} }
       let(:value_link) {
-        handle_change = lambda {|new_val| actual_value[:set] = new_val }
+        handle_change = lambda { |new_val| actual_value[:set] = new_val }
 
         lambda {
           {value: 3, request_change: handle_change}
@@ -319,6 +328,42 @@ describe React do
       describe 'after change' do
         before do
           change_value_in_element_select element, '2'
+        end
+
+        subject { actual_value[:set] }
+
+        it { is_expected.to eq '2' }
+      end
+    end
+
+    context 'array of values' do
+      let(:value_link) {
+        {
+            value: [1, 2, 3],
+            request_change: lambda { |new_val| actual_value[:set] = new_val }
+        }
+      }
+
+      let(:test_klass) {
+        Class.new do
+          include React::Component
+
+          def render
+            div do
+              input value_link: params[:value_link]
+            end
+          end
+        end
+      }
+
+      subject(:element) { React.create_element test_klass,
+                                               value_link: value_link }
+
+      it { is_expected.to contain_dom_element(:input).with_selected_value('1,2,3') }
+
+      describe 'after change' do
+        before do
+          change_value_in_element_select element, '2', element_type=:input
         end
 
         subject { actual_value[:set] }
