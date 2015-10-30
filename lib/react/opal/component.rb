@@ -159,6 +159,8 @@ module React
       def get_prop_type(klass)
         if klass.is_a?(Proc)
           `React.PropTypes.object`
+        elsif klass == Boolean
+          `React.PropTypes.bool`
         elsif klass.ancestors.include?(Numeric)
           `React.PropTypes.number`
         elsif klass == String

@@ -483,6 +483,34 @@ describe React::Component do
     end
   end
 
+  describe '::get_prop_type' do
+    [
+        [Fixnum, 'number'],
+        [String, 'string'],
+        [Array, 'array'],
+        [`Object`, 'object', 'Native object'],
+        [Hash, 'object'],
+        [Method, 'object'], # some random, non hash/struct type class
+        [Boolean, 'bool']
+    ].each do |prop_type_test|
+      type_label = prop_type_test.length > 2 ? prop_type_test.last : prop_type_test.first
+      context type_label do
+        subject do
+          klass = Class.new do
+            include React::Component
+          end
+          klass.get_prop_type(prop_type_test.first)
+        end
+
+        let(:expected_react_type) {
+          `React.PropTypes[#{prop_type_test[1]}]`
+        }
+
+        it { is_expected.to eq expected_react_type }
+      end
+    end
+  end
+
   describe 'context' do
     context 'single value' do
       let(:wrapper) do
@@ -527,76 +555,10 @@ describe React::Component do
         end
       end
 
-      context 'number' do
-        let(:value_type) { Fixnum }
-        let(:value) { 20 }
+      let(:value_type) { Fixnum }
+      let(:value) { 20 }
 
-        it { is_expected.to eq '20' }
-      end
-
-      context 'string' do
-        let(:value_type) { String }
-        let(:value) { 'howdy' }
-
-        it { is_expected.to eq 'howdy' }
-      end
-
-      context 'array' do
-        let(:value_type) { Array }
-        let(:renderer) do
-          lambda do |value|
-            value[0]
-          end
-        end
-        let(:value) { ['howdy'] }
-
-        it { is_expected.to eq 'howdy' }
-      end
-
-      context 'native hash' do
-        let(:value_type) { `Object` }
-        let(:renderer) do
-          lambda do |value|
-            value[:stuff]
-          end
-        end
-        let(:value) { `{stuff: 'howdy'}` }
-
-        it { is_expected.to eq 'howdy' }
-      end
-
-      context 'Ruby hash' do
-        let(:value_type) { Hash }
-        let(:renderer) do
-          lambda do |value|
-            value[:stuff]
-          end
-        end
-        let(:value) { {stuff: 'howdy'} }
-
-        it { is_expected.to eq 'howdy' }
-      end
-
-      context 'custom type' do
-        before do
-          stub_const 'ContextType', Class.new
-          ContextType.class_eval do
-            def stuff
-              22
-            end
-          end
-        end
-
-        let(:value_type) { ContextType }
-        let(:renderer) do
-          lambda do |value|
-            value.stuff
-          end
-        end
-        let(:value) { ContextType.new }
-
-        it { is_expected.to eq '22' }
-      end
+      it { is_expected.to eq '20' }
     end
 
     context 'multiple values' do

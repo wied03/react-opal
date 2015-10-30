@@ -1,3 +1,6 @@
+## 1.0.3
+* Add boolean to supported prop types for context
+
 ## 1.0.2
 * Bring back other React model (cleaner component factory, clean up code)
 
