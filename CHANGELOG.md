@@ -1,3 +1,6 @@
+## 1.0.4
+* Add proc/lambda/function to supported prop types for context
+
 ## 1.0.3
 * Add boolean to supported prop types for context
 

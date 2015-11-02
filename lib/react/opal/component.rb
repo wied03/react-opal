@@ -157,7 +157,9 @@ module React
       end
 
       def get_prop_type(klass)
-        if klass.is_a?(Proc)
+        if klass == Proc
+          `React.PropTypes.func`
+        elsif klass.is_a?(Proc)
           `React.PropTypes.object`
         elsif klass == Boolean
           `React.PropTypes.bool`

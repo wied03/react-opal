@@ -487,6 +487,7 @@ describe React::Component do
     [
         [Fixnum, 'number'],
         [String, 'string'],
+        [Proc, 'func'],
         [Array, 'array'],
         [`Object`, 'object', 'Native object'],
         [Hash, 'object'],
