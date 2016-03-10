@@ -45,7 +45,9 @@ module React
       end
     end
 
-    return `React.createElement.apply(null, #{params})`
+    element = `React.createElement.apply(null, #{params})`
+    element.class.include(React::Component::API) if native
+    element
   end
 
   def self.lower_camelize(str)
