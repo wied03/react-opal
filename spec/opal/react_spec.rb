@@ -1,10 +1,6 @@
 require "spec_helper"
 
 describe React do
-  after(:each) do
-    React::API.clear_component_class_cache
-  end
-
   describe "is_valid_element" do
     it "should return true if passed a valid element" do
       element = `React.createElement('div')`
@@ -22,7 +18,7 @@ describe React do
       element = React.create_element('div')
       expect(React.is_valid_element(element)).to eq(true)
     end
-    
+
     it "should allow passed a React.Component class (constructor function)" do
       hello_message = `React.createClass({displayName: "HelloMessage",
         render: function() {
@@ -47,14 +43,6 @@ describe React do
         expect(React.is_valid_element(element)).to eq(true)
         expect(element.children.length).to eq(3)
       end
-
-      it "should render element with children as array when block yield Array of element" do
-        element = React.create_element('div') do
-          [React.create_element('span'), React.create_element('span'), React.create_element('span')]
-        end
-        instance = renderElementToDocument(element)
-        expect(instance.getDOMNode.childNodes.length).to eq(3)
-      end
     end
     describe "custom element" do
       before do
@@ -69,13 +57,13 @@ describe React do
       it "should create element with only one children correctly" do
         element = React.create_element(Foo) { React.create_element('span') }
         expect(element.children.count).to eq(1)
-        expect(element.children.map{|e| e.element_type }).to eq(["span"])
+        expect(element.children.map { |e| e.element_type }).to eq(["span"])
       end
 
       it "should create element with more than one children correctly" do
         element = React.create_element(Foo) { [React.create_element('span'), React.create_element('span')] }
         expect(element.children.count).to eq(2)
-        expect(element.children.map{|e| e.element_type }).to eq(["span", "span"])
+        expect(element.children.map { |e| e.element_type }).to eq(["span", "span"])
       end
 
       it "should create a valid element provided class defined `render`" do
@@ -95,6 +83,7 @@ describe React do
       it "should use the same instance for the same ReactComponent" do
         Foo.class_eval do
           attr_accessor :a
+
           def initialize(n)
             self.a = 10
           end
@@ -118,13 +107,14 @@ describe React do
           def initialize
             `count = count + 1;`
           end
+
           def render
             React.create_element("div")
           end
         end
 
-        renderToDocument(Foo)
-        renderToDocument(Foo)
+        render_to_document(React.create_element(Foo))
+        render_to_document(React.create_element(Foo))
 
         expect(`count`).to eq(2)
       end
@@ -141,9 +131,10 @@ describe React do
         expect(element.props[:foo]).to eq("bar")
       end
 
-      it "should not camel-case custom property" do
-        element = React.create_element("div", foo_bar: "foo")
-        expect(element.props[:foo_bar]).to eq("foo")
+      it "should camel-case all property" do
+        element = React.create_element("div", foo_bar: "foo", class_name: 'fancy')
+        expect(element.props[:fooBar]).to eq("foo")
+        expect(element.props[:className]).to eq("fancy")
       end
     end
 
@@ -206,7 +197,7 @@ describe React do
   describe "unmount_component_at_node" do
     async "should unmount component at node" do
       div = `document.createElement("div")`
-      React.render(React.create_element('span') { "lorem" }, div ) do
+      React.render(React.create_element('span') { "lorem" }, div) do
         run_async {
           expect(React.unmount_component_at_node(div)).to eq(true)
         }
@@ -214,4 +205,171 @@ describe React do
     end
   end
 
+  def get_dom_node(react_element)
+    rendered_element = `React.addons.TestUtils.renderIntoDocument(#{react_element})`
+    React.find_dom_node rendered_element
+  end
+
+  def get_jq_node(react_element)
+    dom_node = get_dom_node react_element
+    dom_node ? Element.find(dom_node) : nil
+  end
+
+  def find_element_jq_node(react_element, element_type)
+    jq_dom_node = get_jq_node react_element
+    return nil unless jq_dom_node
+    elements = jq_dom_node.find(element_type)
+    elements.any? ? elements : nil
+  end
+
+  def change_value_in_element(element, value, element_type=:select)
+    rendered = `React.addons.TestUtils.renderIntoDocument(#{element})`
+    parent_node = React.find_dom_node rendered
+    element = Element.find(parent_node).find(element_type)
+    element_native = element.get()[0]
+    `React.addons.TestUtils.Simulate.change(#{element_native}, {target: {value: #{value}}})`
+  end
+
+  RSpec::Matchers.define :contain_dom_element do |element_type|
+    match do |react_element|
+      @element = find_element_jq_node react_element, element_type
+      next false unless @element
+      # Don't make the test get the type exactly right
+      @element.value.to_s == @expected_value.to_s
+    end
+
+    failure_message do |react_element|
+      if @element
+        "Found element, but value was '#{@element.value}' and we expected '#{@expected_value}'"
+      else
+        "Expected rendered element to contain a #{element_type}, but it did not, did contain this: #{Native(get_dom_node(react_element)).outerHTML}"
+      end
+    end
+
+    chain :with_selected_value do |expected_value|
+      @expected_value = expected_value
+    end
+  end
+
+  describe 'value_link' do
+    let(:actual_value) { {} }
+
+    let(:option_klass) {
+      Class.new do
+        include React::Component
+
+        def render
+          option value: params[:value]
+        end
+      end
+    }
+
+    let(:select_klass) {
+      opt_klass = option_klass
+      Class.new do
+        include React::Component
+
+        define_method(:render) do
+          div do
+            select id: 'the_select_box', value_link: params[:value_link] do
+              params[:options].map do |option|
+                present opt_klass, value: option[:value]
+              end
+            end
+          end
+        end
+      end
+    }
+
+    subject(:element) {
+      React.create_element select_klass,
+                           value_link: value_link,
+                           options: [{value: '2'}, {value: '3'}]
+    }
+
+    context 'via method' do
+      let(:value_link) { method_value_link }
+
+      def req_change_via_method(new_value)
+        actual_value[:set] = new_value
+      end
+
+      def method_value_link
+        do_it = lambda do |new_value|
+          req_change_via_method new_value
+        end
+        {value: 3, request_change: do_it}
+      end
+
+      it { is_expected.to contain_dom_element(:select).with_selected_value(3) }
+
+      describe 'after change' do
+        before do
+          change_value_in_element element, '2'
+        end
+
+        subject { actual_value[:set] }
+
+        it { is_expected.to eq '2' }
+      end
+    end
+
+    context 'via lambda' do
+      let(:value_link) {
+        handle_change = lambda { |new_val| actual_value[:set] = new_val }
+
+        lambda {
+          {value: 3, request_change: handle_change}
+        }
+      }
+
+      it { is_expected.to contain_dom_element(:select).with_selected_value(3) }
+
+      describe 'after change' do
+        before do
+          change_value_in_element element, '2'
+        end
+
+        subject { actual_value[:set] }
+
+        it { is_expected.to eq '2' }
+      end
+    end
+
+    context 'array of values' do
+      let(:value_link) {
+        {
+            value: [1, 2, 3],
+            request_change: lambda { |new_val| actual_value[:set] = new_val }
+        }
+      }
+
+      let(:test_klass) {
+        Class.new do
+          include React::Component
+
+          def render
+            div do
+              input value_link: params[:value_link]
+            end
+          end
+        end
+      }
+
+      subject(:element) { React.create_element test_klass,
+                                               value_link: value_link }
+
+      it { is_expected.to contain_dom_element(:input).with_selected_value('1,2,3') }
+
+      describe 'after change' do
+        before do
+          change_value_in_element element, '2', element_type=:input
+        end
+
+        subject { actual_value[:set] }
+
+        it { is_expected.to eq '2' }
+      end
+    end
+  end
 end

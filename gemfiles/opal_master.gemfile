@@ -13,4 +13,5 @@ gem 'opal-activesupport'
 
 source 'https://rails-assets.org' do
   gem 'rails-assets-es5-shim'
+  gem 'rails-assets-jquery'
 end

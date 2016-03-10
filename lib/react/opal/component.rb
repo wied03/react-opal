@@ -1,6 +1,7 @@
 require 'active_support/core_ext/class/attribute'
-require 'react/callbacks'
-require 'react/ext/hash'
+require 'react/opal/callbacks'
+require 'react/opal/ext/hash'
+require 'react/opal/component/api'
 
 module React
   module Component
@@ -19,29 +20,23 @@ module React
       base.extend(ClassMethods)
     end
 
-    def initialize(native_element)
-      @native = native_element
-    end
-
     def params
-      Hash.new(`#{@native}.props`)
+      Hash.new(`#{self}.props`).inject({}) do |memo, (k, v)|
+        memo[k.underscore] = v
+        memo
+      end
     end
 
     def refs
-      Hash.new(`#{@native}.refs`)
+      Hash.new(`#{self}.refs`)
     end
 
     def context
-      Hash.new(`#{@native}.context`)
-    end
-
-    def state
-      raise "No native ReactComponent associated" unless @native
-      Hash.new(`#{@native}.state`)
+      Hash.new(`#{self}.context`)
     end
 
     def emit(event_name, *args)
-      self.params["_on#{event_name.to_s.camelize}"].call(*args)
+      self.params["on_#{event_name.to_s}"].call(*args)
     end
 
     def component_will_mount
@@ -108,6 +103,9 @@ module React
       element
     end
 
+    def to_n
+      self
+    end
 
     module ClassMethods
       def prop_types
@@ -159,8 +157,12 @@ module React
       end
 
       def get_prop_type(klass)
-        if klass.is_a?(Proc)
+        if klass == Proc
+          `React.PropTypes.func`
+        elsif klass.is_a?(Proc)
           `React.PropTypes.object`
+        elsif klass == Boolean
+          `React.PropTypes.bool`
         elsif klass.ancestors.include?(Numeric)
           `React.PropTypes.number`
         elsif klass == String
@@ -186,7 +188,7 @@ module React
           define_method(:get_child_context) do
             Hash[self.child_context_get.map do |item, blk|
                    [item, instance_eval(&blk)]
-                 end]
+                 end].to_n
           end
         end
       end
@@ -202,12 +204,10 @@ module React
         states.each do |name|
           # getter
           define_method("#{name}") do
-            return unless @native
             self.state[name]
           end
           # setter
           define_method("#{name}=") do |new_state|
-            return unless @native
             hash = {}
             hash[name] = new_state
             self.set_state(hash)
@@ -215,50 +215,6 @@ module React
             new_state
           end
         end
-      end
-    end
-
-    module API
-      include Native
-
-      alias_native :dom_node, :getDOMNode
-      alias_native :mounted?, :isMounted
-      alias_native :force_update!, :forceUpdate
-
-      def set_props(prop, &block)
-        raise "No native ReactComponent associated" unless @native
-        %x{
-        #{@native}.setProps(#{prop.shallow_to_n}, function(){
-            #{block.call if block}
-          });
-        }
-      end
-
-      def set_props!(prop, &block)
-        raise "No native ReactComponent associated" unless @native
-        %x{
-        #{@native}.replaceProps(#{prop.shallow_to_n}, function(){
-            #{block.call if block}
-          });
-        }
-      end
-
-      def set_state(state, &block)
-        raise "No native ReactComponent associated" unless @native
-        %x{
-        #{@native}.setState(#{state.shallow_to_n}, function(){
-            #{block.call if block}
-          });
-        }
-      end
-
-      def set_state!(state, &block)
-        raise "No native ReactComponent associated" unless @native
-        %x{
-        #{@native}.replaceState(#{state.shallow_to_n}, function(){
-            #{block.call if block}
-          });
-        }
       end
     end
   end
