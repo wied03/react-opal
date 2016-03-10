@@ -154,7 +154,6 @@ describe React do
     end
   end
 
-
   describe "render" do
     async "should render element to DOM" do
       div = `document.createElement("div")`
@@ -177,13 +176,6 @@ describe React do
       React::Component::API.public_instance_methods(true).each do |method_name|
         expect(component).to respond_to(method_name)
       end
-    end
-
-    pending "should return nil to prevent abstraction leakage" do
-      div = `document.createElement("div")`
-      expect {
-        React.render(React.create_element('span') { "lorem" }, div)
-      }.to be_nil
     end
   end
 
