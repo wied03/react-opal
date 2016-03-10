@@ -1,5 +1,10 @@
 require "spec_helper"
 
+class FooComponentDisplayName
+  def render
+  end
+end
+
 describe React::ComponentFactory do
   describe "native_component_class" do
     it "should bridge the defined life cycle methods" do
@@ -42,12 +47,7 @@ describe React::ComponentFactory do
     end
 
     it 'sets the display name' do
-      stub_const 'Foo', Class.new
-      Foo.class_eval do
-        def render
-        end
-      end
-      klass = React::ComponentFactory.native_component_class Foo
+      klass = React::ComponentFactory.native_component_class FooComponentDisplayName
       display_name = `#{klass}.displayName`
       expect(display_name).to eq 'Foo'
     end
