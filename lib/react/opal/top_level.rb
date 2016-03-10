@@ -14,15 +14,15 @@ module React
   def self.create_element(type, properties = {})
     params = []
 
-    # Component Spec or Nomral DOM
-    params << if `(typeof type === 'function')`
+    # Component Spec or Normal DOM
+    native = `(typeof type === 'function')` || HTML_TAGS.include?(type)
+    params << if native
                 type
               elsif type.kind_of?(Class)
                 raise "Provided class should define `render` method" if !(type.method_defined? :render)
                 React::ComponentFactory.native_component_class(type)
               else
-                raise "#{type} not implemented" unless HTML_TAGS.include?(type)
-                type
+                raise "#{type} not implemented"
               end
 
     # Passed in properties
@@ -45,7 +45,9 @@ module React
       end
     end
 
-    return `React.createElement.apply(null, #{params})`
+    element = `React.createElement.apply(null, #{params})`
+    element.class.include(React::Component::API) if native
+    element
   end
 
   def self.lower_camelize(str)
