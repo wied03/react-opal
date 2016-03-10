@@ -49,7 +49,7 @@ describe React::ComponentFactory do
     it 'sets the display name' do
       klass = React::ComponentFactory.native_component_class FooComponentDisplayName
       display_name = `#{klass}.displayName`
-      expect(display_name).to eq 'Foo'
+      expect(display_name).to eq 'FooComponentDisplayName'
     end
   end
 end
