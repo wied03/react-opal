@@ -1,7 +1,10 @@
 Bundler.require
 require 'opal-rspec'
 
-sprockets_env = Opal::RSpec::SprocketsEnvironment.new(spec_pattern='spec/opal/**/*_spec.rb')
+sprockets_env = Opal::RSpec::SprocketsEnvironment.new(spec_pattern='spec/opal/**/*_spec.rb',
+                                                      spec_exclude_pattern=nil,
+                                                      spec_files=nil,
+                                                      default_path='spec/opal')
 sprockets_env.cache = Sprockets::Cache::FileStore.new('./tmp/cache/opal_rspec')
 run Opal::Server.new(sprockets: sprockets_env) { |s|
   s.main = 'opal/rspec/sprockets_runner'

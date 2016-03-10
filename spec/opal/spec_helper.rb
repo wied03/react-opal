@@ -3,7 +3,8 @@ require 'es5-shim'
 require 'jquery'
 require 'opal/jquery'
 # actual react source
-require 'react-with-addons'
+require 'react'
+require 'react/react-with-addons'
 # react.rb wrapper
 require 'react-opal'
 require 'react/opal/testing'
