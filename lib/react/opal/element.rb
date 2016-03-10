@@ -1,21 +1,9 @@
+require 'native'
+
 module React
   # Need to make the React Element class/prototype inherit from this class
-  class Element < %x{
-    (function() {
-      // can't get the prototype for this directly, need to go go in a roundabout way
-      var r = React;
-      var c = r.createClass({
-        render: function() {
-          return null;
-          }
-          });
-      var f = function() {};
-      f.prototype = Object.getPrototypeOf(r.createElement(c));
-      return f;
-      }
-      )()
-    }
-    def self.new
+  class Element
+    def new(native)
       raise "use React.create_element instead"
     end
 
@@ -33,33 +21,6 @@ module React
 
     def ref
       Native(`self.ref`)
-    end
-
-    def on(event_name)
-      name = event_name.to_s.camelize
-
-      prop_key = "on#{name}"
-
-      if React::Event::BUILT_IN_EVENTS.include?(prop_key)
-        callback =  %x{
-          function(event){
-            #{yield React::Event.new(`event`)}
-          }
-        }
-      else
-        callback = %x{
-          function(){
-            #{yield *Array(`arguments`)}
-          }
-        }
-      end
-
-      new_prop = `{}`
-      `new_prop[prop_key] = callback`
-
-      new_element = `React.cloneElement(#{self}, #{new_prop})`
-
-      return new_element
     end
 
     def children

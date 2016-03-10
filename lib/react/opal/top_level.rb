@@ -67,7 +67,7 @@ module React
   end
 
   def self.render(element, container)
-    component = Native(`React.render(#{element}, container, function(){#{yield if block_given?}})`)
+    component = Native(`ReactDOM.render(#{element}, container, function(){#{yield if block_given?}})`)
     component.class.include(React::Component::API)
     component
   end
@@ -77,15 +77,15 @@ module React
   end
 
   def self.render_to_string(element)
-    `React.renderToString(#{element})`
+    `ReactDOMServer.renderToString(#{element})`
   end
 
   def self.render_to_static_markup(element)
-    `React.renderToStaticMarkup(#{element})`
+    `ReactDOMServer.renderToStaticMarkup(#{element})`
   end
 
   def self.unmount_component_at_node(node)
-    `React.unmountComponentAtNode(node)`
+    `ReactDOM.unmountComponentAtNode(node)`
   end
 
   def self.expose_native_class(*args)
@@ -95,6 +95,6 @@ module React
   end
 
   def self.find_dom_node(component)
-    `React.findDOMNode(#{component})`
+    `ReactDOM.findDOMNode(#{component})`
   end
 end
