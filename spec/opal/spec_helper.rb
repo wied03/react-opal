@@ -10,6 +10,7 @@ require 'react/react-dom-server'
 require 'react-opal'
 require 'react/opal/testing'
 require 'element_collision'
+require 'helpers/children'
 
 RSpec.configure do |config|
   config.include React::Testing

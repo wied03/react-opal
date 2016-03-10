@@ -33,7 +33,7 @@ describe React do
       it "should create a valid element with text as only child when block yield String" do
         element = React.create_element('div') { "lorem ipsum" }
         expect(React.is_valid_element(element)).to eq(true)
-        expect(element.children.to_a).to eq(["lorem ipsum"])
+        expect(element).to have_children eq ['lorem ipsum']
       end
 
       it "should create a valid element with children as array when block yield Array of element" do
@@ -41,9 +41,10 @@ describe React do
           [React.create_element('span'), React.create_element('span'), React.create_element('span')]
         end
         expect(React.is_valid_element(element)).to eq(true)
-        expect(element.children.length).to eq(3)
+        expect(element).to have_children have_attributes(length: 3)
       end
     end
+
     describe "custom element" do
       before do
         stub_const 'Foo', Class.new
@@ -54,16 +55,14 @@ describe React do
         end
       end
 
-      it "should create element with only one children correctly" do
+      it "should create element with only one child correctly" do
         element = React.create_element(Foo) { React.create_element('span') }
-        expect(element.children.count).to eq(1)
-        expect(element.children.map { |e| e.element_type }).to eq(["span"])
+        expect(element).to have_children_types eq ['span']
       end
 
-      it "should create element with more than one children correctly" do
+      it "should create element with more than one child correctly" do
         element = React.create_element(Foo) { [React.create_element('span'), React.create_element('span')] }
-        expect(element.children.count).to eq(2)
-        expect(element.children.map { |e| e.element_type }).to eq(["span", "span"])
+        expect(element).to have_children_types eq ['span', 'span']
       end
 
       it "should create a valid element provided class defined `render`" do
@@ -73,7 +72,7 @@ describe React do
 
       it "should allow creating with properties" do
         element = React.create_element(Foo, foo: "bar")
-        expect(element.props[:foo]).to eq("bar")
+        expect(element.JS[:props].JS[:foo]).to eq("bar")
       end
 
       it "should raise error if provided class doesn't defined `render`" do
@@ -123,18 +122,18 @@ describe React do
     describe "create element with properties" do
       it "should enforce snake-cased property name" do
         element = React.create_element("div", class_name: "foo")
-        expect(element.props[:className]).to eq("foo")
+        expect(element.JS[:props].JS[:className]).to eq("foo")
       end
 
       it "should allow custom property" do
         element = React.create_element("div", foo: "bar")
-        expect(element.props[:foo]).to eq("bar")
+        expect(element.JS[:props].JS[:foo]).to eq("bar")
       end
 
       it "should camel-case all property" do
         element = React.create_element("div", foo_bar: "foo", class_name: 'fancy')
-        expect(element.props[:fooBar]).to eq("foo")
-        expect(element.props[:className]).to eq("fancy")
+        expect(element.JS[:props].JS[:fooBar]).to eq("foo")
+        expect(element.JS[:props].JS[:className]).to eq("fancy")
       end
     end
 
@@ -143,17 +142,16 @@ describe React do
         classes = {foo: true, bar: false, lorem: true}
         element = React.create_element("div", class_name: classes)
 
-        expect(element.props[:className]).to eq("foo lorem")
+        expect(element.JS[:props].JS[:className]).to eq("foo lorem")
       end
 
       it "should not alter behavior when passing a string" do
         element = React.create_element("div", class_name: "foo bar")
 
-        expect(element.props[:className]).to eq("foo bar")
+        expect(element.JS[:props].JS[:className]).to eq("foo bar")
       end
     end
   end
-
 
   describe "render" do
     async "should render element to DOM" do
