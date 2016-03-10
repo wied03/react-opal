@@ -46,8 +46,7 @@ module React
     end
 
     element = `React.createElement.apply(null, #{params})`
-    return React::NativeElement.new(element) if native
-    element
+    React::NativeElement.new(element)
   end
 
   def self.lower_camelize(str)

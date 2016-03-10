@@ -22,6 +22,10 @@ module React
         self._source = #{native}._source;
       }
     end
+
+    def element_type
+      self.JS[:type]
+    end
   end
 
   module Component
