@@ -46,7 +46,7 @@ module React
     end
 
     element = `React.createElement.apply(null, #{params})`
-    element.class.include(React::Component::API) if native
+    return React::NativeElement.new(element) if native
     element
   end
 
