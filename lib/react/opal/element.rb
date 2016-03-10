@@ -2,7 +2,7 @@ require 'native'
 
 module React
   # Need to make the React Element class/prototype inherit from this class
-  class Element
+  class NativeElement
     def new(native)
       raise "use React.create_element instead"
     end

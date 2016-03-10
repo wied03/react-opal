@@ -13,12 +13,6 @@ describe React::Element do
     expect(`React.isValidElement(#{element})`).to eq(true)
   end
 
-  describe "#new" do
-    it "should raise error if invoked" do
-      expect { React::Element.new }.to raise_error
-    end
-  end
-
   describe "#element_type" do
     it "should bridge to `type` of native" do
       element = React.create_element('div')
