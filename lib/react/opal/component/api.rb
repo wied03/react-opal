@@ -2,7 +2,7 @@ module React
   module Component
     module API
       def self.included(base)
-        #base.include(::React::Children)
+        base.include(::React::PropsChildren)
       end
 
       def state

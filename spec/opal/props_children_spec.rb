@@ -30,9 +30,9 @@ describe React::PropsChildren do
         React.create_element(React::PropsChildren::TestComponent) { [React.create_element('a'), React.create_element('li')] }
       end
 
-      subject { React.render_to_string element }
+      subject { React.render_to_static_markup element }
 
-      it { is_expected.to eq 'foobar' }
+      it { is_expected.to eq '<span><span>we have 2 kids</span></span>' }
     end
 
     context "empty" do
