@@ -1,6 +1,16 @@
 require "spec_helper"
 
-describe React::Children do
+class React::PropsChildren::TestComponent
+  include React::Component
+
+  def render
+    span do
+      span { "we have #{children.length} kids" }
+    end
+  end
+end
+
+describe React::PropsChildren do
   describe '#children' do
     it "should return a Enumerable" do
       ele = React.create_element('div') { [React.create_element('a'), React.create_element('li')] }
@@ -13,6 +23,16 @@ describe React::Children do
       nodes = ele.children.each
       expect(nodes).to be_a(Enumerator)
       expect(nodes.size).to eq(2)
+    end
+
+    context 'component access' do
+      let(:element) do
+        React.create_element(React::PropsChildren::TestComponent) { [React.create_element('a'), React.create_element('li')] }
+      end
+
+      subject { React.render_to_string element }
+
+      it { is_expected.to eq 'foobar' }
     end
 
     context "empty" do

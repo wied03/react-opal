@@ -1,5 +1,9 @@
 module React
-  module Children
+  module PropsChildren
+    def props
+      Hash.new(`#{self}.props`)
+    end
+
     def children
       nodes = `#{self}.props.children`
 

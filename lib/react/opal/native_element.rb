@@ -1,5 +1,7 @@
 module React
   class NativeElement
+    include PropsChildren
+
     # As of React 0.14, elements are now just plain object literals, so we can't inherit anymore
     # We can just set each of the properties on our object though
     # See var ReactElement = function (type, key, ref, self, source, owner, props) in the React source

@@ -1,6 +1,6 @@
 if RUBY_ENGINE == 'opal'
   require 'react/opal/top_level'
-  require 'react/opal/children'
+  require 'react/opal/props_children'
   require 'react/opal/component'
   require 'react/opal/native_element'
   require 'react/opal/event'

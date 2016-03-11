@@ -9,10 +9,6 @@ module React
         Hash.new(`#{self}.state`)
       end
 
-      def props
-        Hash.new(`#{self}.props`)
-      end
-
       def force_update!
         `#{self}.forceUpdate()`
       end
