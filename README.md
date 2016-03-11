@@ -27,7 +27,7 @@ require "react-opal"
 React.render(React.create_element('h1'){ "Hello World!" }, `document.body`)
 ```
 
-Note: This library does not directly include a react source dependency. This allows you to specify on your own (NPM, Bower, GEMs, etc.) how you wish to use React. If you intend to support Internet Explorer clients, you'll also need to include an object.assign polyfill BEFORE loading this library (e.g. https://github.com/es-shims/object.assign)
+Note: This library does not directly include a react source dependency. This allows you to specify on your own (NPM, Bower, GEMs, etc.) how you wish to use React.
 
 For integration with server (Sinatra, etc), see setup of [TodoMVC](examples/todos) or the [official docs](http://opalrb.org/docs/) of Opal.
 
