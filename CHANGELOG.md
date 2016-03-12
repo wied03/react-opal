@@ -1,6 +1,7 @@
-## 0.14.7.1
-* React 0.14.7 support
+## 0.14.1
+* React 0.14 support
 * Match React version numbers
+* Document context
 
 ## 1.0.4
 * Add proc/lambda/function to supported prop types for context

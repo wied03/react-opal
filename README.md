@@ -2,7 +2,7 @@
 
 [![Build Status](http://img.shields.io/travis/wied03/react-opal/master.svg?style=flat)](http://travis-ci.org/wied03/react-opal)
 
-**This React.rb is a a fork of the original [React.rb](https://github.com/zetachang/react.rb)  [Opal Ruby](http://opalrb.org) wrapper of [React.js library](http://facebook.github.io/react/)**.
+**React-opal is a a fork of the original [React.rb](https://github.com/zetachang/react.rb)  [Opal Ruby](http://opalrb.org) wrapper of [React.js library](http://facebook.github.io/react/)**.
 
 ## Why fork?
 * Keep it simple, don't create an entire framework, just focus on React and Opal
@@ -28,6 +28,7 @@ React.render(React.create_element('h1'){ "Hello World!" }, `document.body`)
 ```
 
 Note: This library does not directly include a react source dependency. This allows you to specify on your own (NPM, Bower, GEMs, etc.) how you wish to use React.
+The version number of react-opal simply reflects which version of React that react-opal has been tested with.
 
 For integration with server (Sinatra, etc), see setup of [TodoMVC](examples/todos) or the [official docs](http://opalrb.org/docs/) of Opal.
 
@@ -145,6 +146,34 @@ def render
 end
 ```
 
+### Context
+
+You can use the React context feature to pass values down a component hierarchy chain.
+
+```ruby
+class ParentComponent
+  include React::Component
+  
+  # Simply supply the Ruby/Opal type that :foo will be and react-opal will map that to a React PropType automatically
+  provide_context(:foo, Fixnum) { params[:foo_value] }
+  
+  def render
+    present ChildComponent
+  end
+end
+
+class ChildComponent
+  include React::Component
+  
+  consume_context(:foo, Fixnum)
+  
+  def render
+    # will render the :foo_value prop passed into ParentComponent
+    div { "foo is #{self.context[:foo]}" } 
+  end
+end
+```
+
 ### Props validation
 
 How about props validation? Inspired by [Grape API](https://github.com/intridea/grape), props validation rule could be created easily through `params` class method as below,
@@ -256,6 +285,7 @@ TBD
 ## License
 
 Originally Copyright (c) 2015 Yi-Cheng Chang (http://github.com/zetachang)
+Portions copyright (c) 2016, BSW Technology Consulting LLC
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
