@@ -1,6 +1,7 @@
 # React-opal
 
 [![Build Status](http://img.shields.io/travis/wied03/react-opal/master.svg?style=flat)](http://travis-ci.org/wied03/react-opal)
+[![Version](http://img.shields.io/gem/v/react-opal.svg?style=flat-square)](https://rubygems.org/gems/react-opal)
 
 **React-opal is a a fork of the original [React.rb](https://github.com/zetachang/react.rb)  [Opal Ruby](http://opalrb.org) wrapper of [React.js library](http://facebook.github.io/react/)**.
 
