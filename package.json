@@ -1,0 +1,27 @@
+{
+  "name": "react-opal",
+  "version": "1.0.0",
+  "description": "[![Build Status](http://img.shields.io/travis/wied03/react-opal/master.svg?style=flat)](http://travis-ci.org/wied03/react-opal)",
+  "main": "index.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wied03/react.rb.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wied03/react.rb/issues"
+  },
+  "homepage": "https://github.com/wied03/react.rb#readme",
+  "devDependencies": {
+    "karma": "^0.13.22",
+    "karma-opal-rspec": "^1.0.10",
+    "karma-phantomjs2-launcher": "^0.5.0"
+  }
+}

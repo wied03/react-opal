@@ -319,7 +319,7 @@ describe React::Component do
         %x{
           var log = [];
           var org_console = window.console;
-          window.console = {warn: function(str){log.push(str)}}
+          window.console = {error: function(str){log.push(str)}}
         }
 
         begin
@@ -353,7 +353,7 @@ describe React::Component do
         %x{
           var log = [];
           var org_console = window.console;
-          window.console = {warn: function(str){log.push(str)}}
+          window.console = {error: function(str){log.push(str)}}
         }
         begin
           render_to_document(React.create_element(Foo2, bar: 10, lorem: Lorem.new))

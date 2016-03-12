@@ -3,7 +3,9 @@ require 'es5-shim'
 require 'jquery'
 require 'opal/jquery'
 # actual react source
-require 'react-with-addons'
+require 'react/react-with-addons'
+require 'react/react-dom'
+require 'react/react-dom-server'
 # react.rb wrapper
 require 'react-opal'
 require 'react/opal/testing'
@@ -14,5 +16,9 @@ RSpec.configure do |config|
   config.after :each do
     React::ComponentFactory.clear_component_class_cache
   end
+  config.filter_run_including focus: true
+  config.run_all_when_everything_filtered = true
 end
+
+require 'matchers'
 
