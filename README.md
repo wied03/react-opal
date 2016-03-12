@@ -27,8 +27,9 @@ require "react-opal"
 React.render(React.create_element('h1'){ "Hello World!" }, `document.body`)
 ```
 
-Note: This library does not directly include a react source dependency. This allows you to specify on your own (NPM, Bower, GEMs, etc.) how you wish to use React.
-The version number of react-opal simply reflects which version of React that react-opal has been tested with.
+**Note:** This library does not directly include a react source dependency but you need to ensure you have React 0.14.
+We don't include the dependency in this GEM in order to allow you to use your preferred packaging (NPM, Bower, GEMs, etc.).
+Thus the version number of the react-opal GEM simply reflects which version of React that react-opal has been tested with.
 
 For integration with server (Sinatra, etc), see setup of [TodoMVC](examples/todos) or the [official docs](http://opalrb.org/docs/) of Opal.
 
@@ -148,7 +149,7 @@ end
 
 ### Context
 
-You can use the React context feature to pass values down a component hierarchy chain.
+You can use the [React context](https://www.tildedave.com/2014/11/15/introduction-to-contexts-in-react-js.html) feature to pass values down a component hierarchy chain.
 
 ```ruby
 class ParentComponent
