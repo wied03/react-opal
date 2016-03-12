@@ -1,12 +1,12 @@
 module React
   module Component
     module API
-      def state
-        Hash.new(`#{self}.state`)
+      def self.included(base)
+        base.include(::React::PropsChildren)
       end
 
-      def props
-        Hash.new(`#{self}.props`)
+      def state
+        Hash.new(`#{self}.state`)
       end
 
       def force_update!
@@ -15,7 +15,7 @@ module React
 
       def set_state(state, &block)
         %x{
-          #{self}.setState(#{state.shallow_to_n}, function(){
+        #{self}.setState(#{state.shallow_to_n}, function(){
             #{block.call if block}
           });
         }
